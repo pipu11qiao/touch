@@ -3,6 +3,8 @@
  */
 var path = require('path');
 var webpack = require('webpack');
+var ExtractPlugin = require('extract-text-webpack-plugin');
+var HtmlWebpackPlugin = require('html-webpack-plugin');
 
 // 区分开发和生产
 var env = process.env.NODE_ENV.trim();
@@ -10,19 +12,49 @@ var PRODUCTION = env === 'production';
 var DEVELOPMENT = env === 'development';
 
 var entry = PRODUCTION ? './src/index.js' : ['./src/index.js', 'webpack/hot/dev-server', 'webpack-dev-server/client?http://localhost:8080'];
+// plugin
+console.log(PRODUCTION);
 
 var plugins = PRODUCTION
-  ? []
-  : [ new webpack.HotModuleReplacementPlugin()];
+  ? [
+    new ExtractPlugin('style-[contenthash:10].css'),
+    new HtmlWebpackPlugin({
+      template: './index-template.html'
+    }),
+    new webpack.optimize.UglifyJsPlugin()
+  ]
+  : [new webpack.HotModuleReplacementPlugin()];
 
-console.log(env);
+// definePlugin
+plugins.push(new webpack.DefinePlugin({
+  DEVELOPMENT: JSON.stringify(DEVELOPMENT),
+  PRODUCTION: JSON.stringify(PRODUCTION)
+}));
+
+var cssLoaders = PRODUCTION
+  ? ExtractPlugin.extract({
+    loader:
+      {
+        loader: 'css-loader',
+        options: {
+          modules: true,
+          localIdentName: '[hash:base64:10]'
+        }
+      }
+  })
+  : ['style-loader','css-loader?localIdentName=[path][name] --- [local]'];
+
 module.exports = {
   entry: entry,
   plugins: plugins,
   output: {
-    filename: 'app.js',
     path: path.join(__dirname,'./dist'),
-    publicPath: '/dist/'
+    publicPath: PRODUCTION ? '/' : '/dist/',
+    filename: PRODUCTION ? 'app[hash:12].min.js': 'app.js'
+  },
+  externals: {
+    zepto: 'Zepto',
+    jquery: 'jQuery'
   },
   module:{
     loaders:[
@@ -35,9 +67,15 @@ module.exports = {
       // img
       {
         test: /\.(jpg|png|gif)$/,
-        loader: 'file-loader?name=images/[hash:12].[ext]',
+        loaders: 'url-loader?limit=10000&name=images/[hash:12].[ext]',
         exclude: path.join(__dirname,'./node_modules')
       },
+      // css
+      {
+        test: /\.css$/i,
+        loaders: cssLoaders,
+        exclude: path.join(__dirname,'./node_modules')
+      }
     ]
   },
 };

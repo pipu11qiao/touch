@@ -1,0 +1,34 @@
+/*整个页面大的元素*/
+html{
+  font-size: 100px;
+}
+html,body{
+  width: 100%;
+  height: auto;
+  background: #fff;
+}
+.clearfix:after{
+  content: '';
+  display: table;
+  height: 0;
+  clear: both;
+}
+.title{
+  width: 100%;
+  height: 1rem;
+  line-height: 1rem;
+  background: #ddd;
+  font-size: .3rem;
+  text-align: center;
+}
+.imgView{
+  width: 100%;
+}
+.optionView{
+  width: 100%;
+  height: 1rem;
+  line-height: 1rem;
+  background: #ddd;
+  font-size: .3rem;
+  text-align: center;
+}
