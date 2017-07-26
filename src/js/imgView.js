@@ -4,11 +4,17 @@
 // 接受图片地址在页面渲染 更新图片
 
 import $ from 'jquery';
+var jQueryPreset = require('./preset');
+jQueryPreset($);
+let start = $.touchEvents.start;
+let move = $.touchEvents.move;
+let end = $.touchEvents.end;
+console.log(start,move,end);
 // @imgArr 左右图片的路径 cb 如果渲染图片过程中出现错误怎么处理
 let ImgView = function (imgArr,cb) {
   this.srcArray = imgArr;
   this.imgArray = null; // 图片元素数组
-  this.imgAll = false; // 获取图片完成
+  // this.imgAll = false; // 获取图片完成
   this.isMoving = false; // 是否在移动
   this.curIndex = 0; // 当前索引
   this.isInit = true; // 是否是初始化 区分初始和更新
@@ -17,6 +23,9 @@ let ImgView = function (imgArr,cb) {
   this.width = document.body.clientWidth;
   this.height = 0;
   this.isUpdate = true;
+  this.isStart = false;
+  this.firstX = 0;
+  this.preX = 0;
   this.el = {
     $containerEl: null,
     $imgListEl: null,
@@ -119,9 +128,12 @@ ImgView.prototype = {
       <img src="${item}" alt="">
     </li>`;
     });
-
-    me.el.$containerEl.html(`<ul class="imgList clearfix" style="width: ${me.srcArray.length * me.width + 'px'};">${itemStr}</ul>`);
-
+    me.el.$containerEl.html(`
+<ul class="imgList clearfix" style="width: ${me.srcArray.length * me.width + 'px'}; ">${itemStr}</ul>`);
+    me.el.$imgListEl = me.el.$containerEl.find('.imgList'); // 获取imgUl
+    me.el.$imgListEl.transition(0);
+    me.el.$imgListEl.transform(`tanslate(${-(me.width + 'px')},0)`);
+    me.el.$imgItemEls = me.el.$containerEl.find('.imgItem'); // 获取imgLi
   },
   init() {
     this.getImage();
@@ -130,6 +142,7 @@ ImgView.prototype = {
     // 图片初始加载完成 绑定事件
     this.getRootElement();
     this.renderHtml();
+    this.bind();
     console.log(this.el.$containerEl);
   },
   imgUpdate() {
@@ -137,7 +150,18 @@ ImgView.prototype = {
 
   },
   bind(){
+    // 给ul元素绑定事件
+    let me = this;
+    me.el.$containerEl.on(start,function (e) {
+      me.isStart = true;
+      me.firstX = e.clientX;
+    }).on(end,function () {
+      me.isStart = false;
+    }).on(move,function (e) {
+      var delX = parseInt(e.clientX - me.preX);
 
+
+    })
   }
 };
 
