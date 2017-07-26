@@ -2,19 +2,30 @@
  * Created by Administrator on 2017/7/26 0026.
  */
 import $ from 'jquery';
+function isPC() {
+  let userAgentInfo = navigator.userAgent;
+  let Agents = ["Android", "iPhone", "SymbianOS", "Windows Phone", "iPad", "iPod"];
+  let flag = true;
+  for (let v = 0; v < Agents.length; v++) {
+    if (userAgentInfo.indexOf(Agents[v]) > 0) { flag = false; break; }
+  }
+  return flag;
+}
 let jQueryPreset = function ($) {
   //support
+
   $.support = (function() {
     var support = {
-      touch: !!(('ontouchstart' in window) || window.DocumentTouch && document instanceof window.DocumentTouch)
+      // touch: !!(('ontouchstart' in window) || window.DocumentTouch && document instanceof window.DocumentTouch)
+      touch: !isPC()
     };
     return support;
   })();
 
   $.touchEvents = {
-    start: $.support.touch ? 'touchstart' : 'mousedown',
-    move: $.support.touch ? 'touchmove' : 'mousemove',
-    end: $.support.touch ? 'touchend' : 'mouseup'
+    start: !isPC() ? 'touchstart' : 'mousedown',
+    move: !isPC() ? 'touchmove' : 'mousemove',
+    end: !isPC() ? 'touchend' : 'mouseup'
   };
   $.getTranslate = function (el, axis) {
     var matrix, curTransform, curStyle, transformMatrix;
@@ -120,6 +131,9 @@ let jQueryPreset = function ($) {
       elStyle.webkitTransform = elStyle.MozTransform = elStyle.transform = transform;
     }
     return this;
+  };
+  $.fn.transformX = function (x) {
+    return this.transform('translate3d(' + x +'px,0,0)')
   };
 
   return $;

@@ -9,7 +9,13 @@ jQueryPreset($);
 let start = $.touchEvents.start;
 let move = $.touchEvents.move;
 let end = $.touchEvents.end;
-console.log(start,move,end);
+let isPhone = $.support.touch;
+let getTarget = function (e) {
+  if(isPhone){
+    return e.touches[0];
+  }
+  return e;
+};
 // @imgArr 左右图片的路径 cb 如果渲染图片过程中出现错误怎么处理
 let ImgView = function (imgArr,cb) {
   this.srcArray = imgArr;
@@ -24,8 +30,10 @@ let ImgView = function (imgArr,cb) {
   this.height = 0;
   this.isUpdate = true;
   this.isStart = false;
+  this.minDistance = 5;
   this.firstX = 0;
   this.preX = 0;
+  this.duration = 200;
   this.el = {
     $containerEl: null,
     $imgListEl: null,
@@ -84,7 +92,6 @@ ImgView.prototype = {
           let width = img.width;
           let height = img.height;
           me.height = parseInt(me.width * height / width);
-          console.log(me.width,me.height);
         }
         dtd.resolve({imgVersion: me.imgVersion,img}); // 改变Deferred对象的执行状态
       };
@@ -98,7 +105,6 @@ ImgView.prototype = {
     return wait(dtd); // 新建一个d对象，改为对这个对象进行操作
   },
   getImgDiffers () {
-    console.log(this);
     var me = this;
     let arr = [];
     this.srcArray.forEach(function (item) {
@@ -123,17 +129,25 @@ ImgView.prototype = {
     me.srcArray.unshift(me.srcArray[me.srcArray.length-2]);
 
     let itemStr = '';
-    me.srcArray.forEach((item) => {
+    let indexStr = ''
+    me.srcArray.forEach((item,index) => {
       itemStr += `<li class="imgItem" style="width:${me.width + 'px'};height: ${me.height + 'px'}">
       <img src="${item}" alt="">
     </li>`;
+      if(index !== 0 && index !== me.srcArray.length -1) {
+        indexStr += `<li class="indexItem ${index === 1 ? 'active' : ''}"></li>`
+      }
+
     });
     me.el.$containerEl.html(`
-<ul class="imgList clearfix" style="width: ${me.srcArray.length * me.width + 'px'}; ">${itemStr}</ul>`);
+<ul class="imgList clearfix" style="width: ${me.srcArray.length * me.width + 'px'}; ">${itemStr}</ul>
+<ul class="indexList clearfix">${indexStr}</ul>`);
     me.el.$imgListEl = me.el.$containerEl.find('.imgList'); // 获取imgUl
-    me.el.$imgListEl.transition(0);
-    me.el.$imgListEl.transform(`tanslate(${-(me.width + 'px')},0)`);
+    me.move(-me.width,false);
     me.el.$imgItemEls = me.el.$containerEl.find('.imgItem'); // 获取imgLi
+
+    me.el.$indexListEl = me.el.$containerEl.find('.indexList'); // 获取indexUl
+    me.el.$indexItemEls = me.el.$containerEl.find('.indexItem'); // 获取indexLi
   },
   init() {
     this.getImage();
@@ -143,24 +157,90 @@ ImgView.prototype = {
     this.getRootElement();
     this.renderHtml();
     this.bind();
-    console.log(this.el.$containerEl);
+    // console.log(this.el.$containerEl);
   },
   imgUpdate() {
     // 图片更新
 
   },
+  move: function (distance,type) {
+    // type 为true 是动效，为 false 无动效
+    this.el.$imgListEl.transition(type ? this.duration : 0);
+    if(type) {
+      let clientLeft = this.el.$imgListEl[0].clientLeft;
+    }
+    this.el.$imgListEl.transformX(distance);
+  },
+  transitionMove: function () {
+    let me = this;
+    // 根据当前位置判断是第几个，移动过去，并且对应上图标。
+    let curX = $.getTranslate(me.el.$imgListEl[0],'x');
+    me.curIndex = me.getMoveToIndex(Math.abs(curX));
+    me.move(-(me.curIndex  * me.width),true);
+    // console.log(me.curIndex);
+  },
+  getMoveToIndex(x) {
+    for(let i = 1; i < this.srcArray.length + 1; i ++) {
+      if(x < i * this.width - this.width / 2){
+        return i -1;
+      }
+    }
+  },
+  updateIndex() {
+    let me = this;
+    let curX = $.getTranslate(me.el.$imgListEl[0],'x');
+    let renderIndex = Math.floor((Math.abs(curX)- me.width / 2) / me.width);
+    // console.log(renderIndex);
+    if(renderIndex === -1) {
+      renderIndex = me.srcArray.length -3;
+    } else if(renderIndex === me.srcArray.length -2) {
+      renderIndex = 0;
+    }
+    let $activeIndexEl = me.el.$indexListEl.find('.active');
+    let curIndex = $activeIndexEl.index() ;
+    // console.log(renderIndex);
+    if(renderIndex !== curIndex) {
+      // 需要渲染
+      $activeIndexEl.removeClass('active');
+      $(me.el.$indexItemEls.get(renderIndex)).addClass('active');
+    }
+  },
   bind(){
     // 给ul元素绑定事件
     let me = this;
     me.el.$containerEl.on(start,function (e) {
+      e.preventDefault();
+      let target = getTarget(e);
       me.isStart = true;
-      me.firstX = e.clientX;
+      me.firstX = target.clientX;
+      me.preX = target.clientX;
     }).on(end,function () {
       me.isStart = false;
+      me.isMoving = true;
+      me.transitionMove();
+      // console.log(3);
     }).on(move,function (e) {
-      var delX = parseInt(e.clientX - me.preX);
+      let target = getTarget(e)
+      if(me.isStart && !me.isMoving) {
+        let delX = parseInt(target.clientX - me.preX);
+        // 获得 ul的translate 并实时改变
+        let curX = $.getTranslate(me.el.$imgListEl[0],'x');
+        if(Math.abs(delX) > me.minDistance) {
+          me.move(curX + delX,false);
+          me.preX = target.clientX;
+          me.updateIndex();
+        }
 
-
+      }
+    }).on('mouseout',function () {
+      me.isStart = false;
+    }).on('transitionend',function (e) {
+      me.isMoving = false;
+      me.updateIndex();
+      if(me.curIndex === 0 || me.curIndex === 7){
+        let distance = me.curIndex === 0 ? me.srcArray.length - 2 : 1;
+        me.move(-(distance * me.width),false);
+      }
     })
   }
 };
