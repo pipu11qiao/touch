@@ -24,8 +24,20 @@ let imgs = [
   'http://mrmsapi.markormake.com/modules/lemon/uploads/files/render_image_40618622768671569738979451.png',
   'http://mrmsapi.markormake.com/modules/lemon/uploads/files/render_image_76013595424591486471383832.png'
 ];
+let updateImgs = [
+  'http://mrmsapi.markormake.com/modules/lemon/uploads/files/render_image_14093041233712455698088742.png',
+  'http://mrmsapi.markormake.com/modules/lemon/uploads/files/render_image_66775230038912315940675325.png',
+  'http://mrmsapi.markormake.com/modules/lemon/uploads/files/render_image_79119357001032401794511824.png',
+  'http://mrmsapi.markormake.com/modules/lemon/uploads/files/render_image_64106323895978197742812335.png',
+  'http://mrmsapi.markormake.com/modules/lemon/uploads/files/render_image_88677902286872916883225552.png',
+  'http://mrmsapi.markormake.com/modules/lemon/uploads/files/render_image_41791588487106923284940421.png'
+];
 
 let imgeView = new ImgView(imgs);
+
+setTimeout(function () {
+  imgeView.update(updateImgs);
+},4000)
 
 if(DEVELOPMENT) {
   if(module.hot) {

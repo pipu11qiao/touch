@@ -45,19 +45,72 @@ table {
   box-sizing: border-box;
 }/*整个页面大的元素*/
 html{
-  font-size: 50px;
+  font-size: 100px;
 }
 html,body{
   width: 100%;
   height: auto;
   background: #fff;
 }
-
-.MuDTX6Sv2B{
+._1KSLMu2tY1:after{
+  content: '';
+  display: table;
+  height: 0;
+  clear: both;
+}
+.Gcsl0nAYdY{
+  width: 100%;
+  height: 1rem;
+  line-height: 1rem;
+  background: #ddd;
+  font-size: .3rem;
+  text-align: center;
+}
+._12cNzYTZRl{
+  width: 100%;
+}
+.Xs_kA6H7qy{
+  width: 100%;
+  height: 1rem;
+  line-height: 1rem;
+  background: #ddd;
+  font-size: .3rem;
+  text-align: center;
+}
+._24N5I99jj-{
+  position: relative;
+  width: 100%;
+  height: auto;
+  overflow: hidden;
+  background: #fff;
+}
+._24N5I99jj- ._3_Nph0tXJh{
+  transition: all .3s ease;
+  -webkit-transition: all .3s ease;
+}
+._24N5I99jj- ._3acElC4dGm {
+  float: left;
+}
+._24N5I99jj- ._3acElC4dGm img{
+  width: 100%;
+  height: 100%;
+}
+._24N5I99jj- ._3NMhsOQ2DM{
   position: absolute;
-  top: 1rem;
-  width: 80%;
-  left: 10%;
-  height: 4rem;
-  border: 1px solid #ddd;
+  bottom: 0.4rem;
+  left: 50%;
+  transform: translate(-50%,0);
+  -webkit-transform: translate(-50%,0);
+}
+._24N5I99jj- ._1rr6u5Xv8J{
+  float: left;
+  width: .2rem;
+  height: .2rem;
+  border-radius: .1rem .1rem;
+  margin: 0 0.1rem;
+  background-color: rgba(170,170,200,.8);
+}
+
+._24N5I99jj- ._1rr6u5Xv8J._2kdJJHZV4s{
+  background-color: rgba(70,70,100,.8);
 }
